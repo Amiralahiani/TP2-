@@ -1,0 +1,40 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+}
+.row {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+.pokemon {
+    width: 40%;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+}
+.round {
+    text-align: center;
+    background-color: #f8d7da;
+    padding: 10px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+.result {
+    background-color: #d1ecf1;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+.winner {
+    background-color: #d4edda;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+.name {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: left;
+}
