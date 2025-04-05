@@ -13,7 +13,6 @@ if (!$user->isAuthenticated()) {
     exit;
 }
 
-$isAdmin = $user->isAdmin();
 $section = new Section();
 
 // Vérifier si un terme de recherche a été soumis
@@ -73,9 +72,8 @@ $sections = $section->findAll($search);  // Fonction findAll avec recherche par 
                     <th>ID</th>
                     <th>Designation</th>
                     <th>Description</th>
-                    <?php if ($isAdmin): ?>
-                        <th>Actions</th>
-                    <?php endif; ?>
+                    <th>Actions</th>
+    
                 </tr>
             </thead>
             <tbody>
