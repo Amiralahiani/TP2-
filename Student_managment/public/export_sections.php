@@ -1,7 +1,4 @@
 <?php
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
 require_once '../classes/Database.php';
 require_once '../classes/Repository.php';
 require_once '../classes/Section.php';
@@ -11,11 +8,12 @@ $sections = $section->findAll();
 
 if (isset($_GET['type'])) {
     $type = $_GET['type'];
+    $filename = 'sections_' . date('Y-m-d');
 
     // Export CSV
-    if ($_GET['type'] == 'csv') {
+    if ($type == 'csv') {
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="sections.txt"');
+        header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
     
         $output = fopen('php://output', 'w');
         fputcsv($output, ['ID', 'Designation', 'Description']);
@@ -26,50 +24,90 @@ if (isset($_GET['type'])) {
         exit();
     }
     
-
-    // Export Excel
-    if ($_GET['type'] == 'excel') {
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="sections.xlsx"');
-    
-        $output = fopen('php://output', 'w');
-        fputcsv($output, ['ID', 'Designation', 'Description']);
+    // Export Excel (faux Excel en HTML)
+    if ($type == 'excel') {
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="' . $filename . '.xls"');
+        
+        $html = '<html>';
+        $html .= '<head><meta charset="UTF-8"></head>';
+        $html .= '<body>';
+        $html .= '<table border="1">';
+        $html .= '<tr><th>ID</th><th>Designation</th><th>Description</th></tr>';
+        
         foreach ($sections as $sec) {
-            fputcsv($output, [$sec['id'], $sec['designation'], $sec['description']]);
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($sec['id']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($sec['designation']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($sec['description']) . '</td>';
+            $html .= '</tr>';
         }
-        fclose($output);
+        
+        $html .= '</table>';
+        $html .= '</body></html>';
+        
+        echo $html;
         exit();
     }
     
-    // Export PDF
-    if ($type == 'pdf') {
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="sections.pdf"');
+    // Export PDF (solution simple sans TCPDF)
+    // Export PDF basique (nécessite un navigateur moderne)
+if ($type == 'pdf') {
+    $html = '<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Liste des Sections</title>
+        <style>
+            body { font-family: Arial; margin: 20px; }
+            h1 { text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .footer { text-align: right; margin-top: 30px; font-size: 0.8em; }
+        </style>
+    </head>
+    <body>
+        <h1>Liste des Sections</h1>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Designation</th>
+                <th>Description</th>
+            </tr>';
 
-        require_once 'path/to/tcpdf/tcpdf.php';
-
-        $pdf = new TCPDF();
-        $pdf->AddPage();
-        $pdf->SetFont('Helvetica', '', 12);
-
-        $pdf->Cell(0, 10, 'Liste des Sections', 0, 1, 'C');
-
-        $pdf->Cell(30, 10, 'ID', 1);
-        $pdf->Cell(50, 10, 'Designation', 1);
-        $pdf->Cell(60, 10, 'Description', 1);
-        $pdf->Ln();
-
-        foreach ($sections as $sec) {
-            $pdf->Cell(30, 10, $sec['id'], 1);
-            $pdf->Cell(50, 10, $sec['designation'], 1);
-            $pdf->Cell(60, 10, $sec['description'], 1);
-            $pdf->Ln();
-        }
-
-        $pdf->Output('sections.pdf', 'D');
-        exit();
+    foreach ($sections as $sec) {
+        $html .= '<tr>
+            <td>' . htmlspecialchars($sec['id']) . '</td>
+            <td>' . htmlspecialchars($sec['designation']) . '</td>
+            <td>' . htmlspecialchars($sec['description']) . '</td>
+        </tr>';
     }
+
+    $html .= '</table>
+        <div class="footer">Généré le ' . date('d/m/Y à H:i') . '</div>
+    </body>
+    </html>';
+
+    // Enregistrement temporaire
+    $tempFile = tempnam(sys_get_temp_dir(), 'pdf');
+    file_put_contents($tempFile . '.html', $html);
+
+    // Téléchargement
+    header('Content-Type: text/html');
+    header('Content-Disposition: attachment; filename="sections_' . date('Y-m-d') . '.html"');
+    echo '<script>
+        window.onload = function() {
+            window.print();
+            setTimeout(function() {
+                window.close();
+            }, 1000);
+        }
+    </script>';
+    echo $html;
+    exit();
+}
 }
 
-echo 'Type d\'export invalide.';
+echo 'Type d\'export invalide. Les formats disponibles sont : csv, excel, pdf';
 exit();
