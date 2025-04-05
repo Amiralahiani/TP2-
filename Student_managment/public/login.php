@@ -7,9 +7,9 @@ require_once ('../classes/Section.php');
 require_once('../classes/Students.php');
 
 
-if (!Database::createTables()) {
-    Database::insertInitialData();
-}
+Database::createTables();
+Database::insertInitialData();
+
 
 $error = '';
 
