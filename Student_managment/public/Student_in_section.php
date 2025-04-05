@@ -4,23 +4,22 @@ require_once '../classes/Database.php';
 require_once '../classes/Repository.php';
 require_once '../classes/User.php';
 require_once '../classes/Section.php';
+require_once '../classes/Students.php';
 
 $user = new User();
-
-// Vérification si l'utilisateur est authentifié
 if (!$user->isAuthenticated()) {
     header('Location: login.php');
     exit;
 }
+$pdo = Database::connect();
 
-$isAdmin = $user->isAdmin();
-$section = new Section();
-
-// Vérifier si un terme de recherche a été soumis
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-
-// Récupérer la liste des sections en filtrant si nécessaire
-$sections = $section->findAll($search);  // Fonction findAll avec recherche par designation ou description
+$sectionName = $_GET['section']; 
+$query = "SELECT * FROM students WHERE section = :section";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':section', $sectionName);
+$stmt->execute();
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+ 
 ?>
 
 <!DOCTYPE html>
@@ -28,17 +27,9 @@ $sections = $section->findAll($search);  // Fonction findAll avec recherche par 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des sections</title>
+    <title>Liste des étudiants</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <style>
-        .container {
-            padding-top: 20px;
-        }
-        .btn-export {
-            margin-right: 10px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 </head>
 <body>
 
@@ -55,58 +46,55 @@ $sections = $section->findAll($search);  // Fonction findAll avec recherche par 
         </div>
     </nav>
 
-    <div class="container">
-        <h2 class="mb-4">Liste des sections</h2>
+    <div class="container mt-5">
+        <h2 class="mb-4">Liste des étudiants</h2>
 
 
         <!-- Boutons d'exportation -->
         <div class="mb-3">
-            <a href="export_sections.php?type=csv" class="btn btn-secondary btn-export">Exporter en CSV</a>
-            <a href="export_sections.php?type=excel" class="btn btn-success btn-export">Exporter en Excel</a>
-            <a href="export_sections.php?type=pdf" class="btn btn-danger btn-export">Exporter en PDF</a>
+            <a href="export_students.php?type=csv" class="btn btn-secondary">Exporter en CSV</a>
+            <a href="export_students.php?type=excel" class="btn btn-success">Exporter en Excel</a>
+            <a href="export_students.php?type=pdf" class="btn btn-danger">Exporter en PDF</a>
+
         </div>
 
-        <!-- Tableau des sections -->
-        <table class="table table-bordered table-striped" id="sectionsTable">
+        <!-- Tableau des étudiants -->
+        <table id="studentsTable" class="table table-bordered table-striped">
             <thead class="thead-dark">
                 <tr>
                     <th>ID</th>
-                    <th>Designation</th>
-                    <th>Description</th>
-                    <?php if ($isAdmin): ?>
-                        <th>Actions</th>
-                    <?php endif; ?>
+                    <th>Image</th>
+                    <th>Nom</th>
+                    <th>Date de naissance</th>
+                    <th>Section</th>
+        
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($sections as $sec): ?>
+                <?php foreach ($students as $stu): ?>
                     <tr>
-                        <td><?= $sec['id'] ?></td>
-                        <td><?= $sec['designation'] ?></td>
-                        <td><?= $sec['description'] ?></td>
-                        <td>
-                        <a href="Student_in_section.php?section=<?= $sec['designation'] ?>" class="btn btn-info btn-sm">
-            Voir les étudiants de <?= $sec['designation'] ?>
-        </a>
-                        </td>
+                    <td><?= $stu['id'] ?></td>
+                    <td><img src="<?= $stu['image'] ?>" alt="Image" width="50"></td>
+                    <td><?= $stu['name'] ?></td>
+                    <td><?= $stu['birthday'] ?></td>
+                    <td><?= $stu['section'] ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 
-
-    <!-- Scripts -->
+    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
+
     <!-- DataTables JS -->
     <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#sectionsTable').DataTable();
+            $('#studentsTable').DataTable();
         });
     </script>
 </body>
