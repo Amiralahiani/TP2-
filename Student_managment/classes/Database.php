@@ -3,9 +3,9 @@ class Database {
     public static function connect() {
         // Paramètres de connexion à la base de données
         $host = 'localhost';
-        $db = 'student_management';
+        $db = 'student_managment1';
         $user = 'root';
-        $pass = 'Ronaldo2023';
+        $pass = 'amiLAra123';
         
         try {
             $pdo = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
@@ -18,44 +18,51 @@ class Database {
     
     public static function createTables() {
         $pdo = self::connect();
-        
+    
         try {
-            // Création de la table users
-            $pdo->exec("
-                CREATE TABLE IF NOT EXISTS users (
+            // Check if the 'users' table exists
+            $result = $pdo->query("SHOW TABLES LIKE 'users'");
+            if ($result->rowCount() == 0) {
+                // Create users table if it doesn't exist
+                $pdo->exec("CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(255) NOT NULL UNIQUE,
                     email VARCHAR(255) NOT NULL UNIQUE,
                     password VARCHAR(255) NOT NULL,
                     role ENUM('admin', 'user') DEFAULT 'user'
-                )
-            ");
-            
-            // Création de la table sections
-            $pdo->exec("
-                CREATE TABLE IF NOT EXISTS sections (
+                )");
+            }
+    
+            // Check if the 'sections' table exists
+            $result = $pdo->query("SHOW TABLES LIKE 'sections'");
+            if ($result->rowCount() == 0) {
+                // Create sections table if it doesn't exist
+                $pdo->exec("CREATE TABLE IF NOT EXISTS sections (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     designation VARCHAR(255) NOT NULL,
                     description TEXT
-                )
-            ");
-            
-            // Création de la table students
-            $pdo->exec("
-                CREATE TABLE IF NOT EXISTS students (
+                )");
+            }
+    
+            // Check if the 'students' table exists
+            $result = $pdo->query("SHOW TABLES LIKE 'students'");
+            if ($result->rowCount() == 0) {
+                // Create students table if it doesn't exist
+                $pdo->exec("CREATE TABLE IF NOT EXISTS students (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     birthday DATE,
                     section VARCHAR(100),
-                    image varchar(1000) NOT NULL
-                )
-            ");
-            
+                    image VARCHAR(1000) NOT NULL
+                )");
+            }
+    
             return true;
         } catch (PDOException $e) {
             die("Table creation failed: " . $e->getMessage());
         }
     }
+    
     
     public static function insertInitialData() {
         $pdo = self::connect();

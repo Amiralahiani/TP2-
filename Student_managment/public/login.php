@@ -7,6 +7,10 @@ require_once ('../classes/Section.php');
 require_once('../classes/Students.php');
 
 
+if (!Database::createTables()) {
+    Database::insertInitialData();
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
