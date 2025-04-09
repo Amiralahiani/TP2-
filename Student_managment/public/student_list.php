@@ -31,6 +31,7 @@ $students = $student->findAll($search);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste des étudiants</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 </head>
 <body>
@@ -51,17 +52,21 @@ $students = $student->findAll($search);
     <div class="container mt-5">
         <h2 class="mb-4">Liste des étudiants</h2>
 
-        <!-- Formulaire de recherche -->
-        <form method="GET" action="student_list.php" class="mb-3">
-            <div class="row">
-                <div class="col-md-6">
-                    <input type="text" name="search" placeholder="Rechercher par nom" value="<?= htmlspecialchars($search) ?>" class="form-control" style="width: 300px; display: inline-block;">
-                </div>
-                <div class="col-md-6">
-                    <button type="submit" class="btn btn-primary">Filtrer</button>
-                </div>
-            </div>
-        </form>
+    
+    <form method="GET" action="student_list.php" class="form-inline mb-3">
+        <input type="text" name="search" placeholder="Rechercher par nom"
+            value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>"
+            class="form-control mr-2" style="width: 250px;">
+
+        <button type="submit" class="btn btn-primary mr-2">Filtrer</button>
+
+            <a href="add_student.php" class="btn btn-success" title="Ajouter un étudiant">
+            <i class="bi bi-person-add"></i>
+            </a>
+
+    </form>
+
+
 
         <!-- Boutons d'exportation -->
         <div class="mb-3">
